@@ -1,7 +1,9 @@
-from flask import Flask, request, redirect
+from flask import Flask, request, redirect, make_response, url_for, session
 import click
 
 app = Flask(__name__)
+#配合session使用
+app.secret_key = '1234567890'
 
 # 最基本的入口
 @app.route('/')
@@ -64,7 +66,26 @@ def do_something():
 def helloo():
     return redirect('http://www.baidu.com')
 
+#设置cookie
+@app.route('/set/<name>')
+def set_cookie(name):
+    response = make_response(redirect(url_for('hello1')))
+    response.set_cookie('name', name)
+    return response
 
+#获取cookie
+@app.route('/helllo')
+def get_hello():
+    name = request.args.get('name')
+    if name is None:
+        name = request.cookies.get('name', 'Human')
+    return '<h1>Hello, %s</h1>' % name
+
+#session
+@app.route('/login')
+def login():
+    session['logged_in'] = True
+    return redirect(url_for('hello1'))
 
 if __name__ == '__main__':
     app.run()
